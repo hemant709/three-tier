@@ -9,6 +9,7 @@ pipeline {
       steps {
         dir(env.TF_DIR) {
           sh 'terraform init'
+          sh 'terraform plan'
           sh 'terraform apply -auto-approve'
         }
       }
