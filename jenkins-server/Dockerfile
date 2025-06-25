@@ -11,4 +11,4 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 COPY plugins.yaml /usr/share/jenkins/ref/plugins.yaml
-RUN jenkins-plugin-cli --plugins-file /usr/share/jenkins/ref/plugins.yaml
+RUN jenkins-plugin-cli --plugin-file /usr/share/jenkins/ref/plugins.yaml
