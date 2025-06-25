@@ -1,0 +1,56 @@
+---
+- hosts: all
+  become: yes
+  tasks:
+    - name: Install Docker
+      yum: name=docker state=present
+
+    - name: Enable Docker
+      systemd: name=docker enabled=yes state=started
+
+    - name: Add Kubernetes repo
+      copy:
+        dest: /etc/yum.repos.d/kubernetes.repo
+        content: |
+          [kubernetes]
+          name=Kubernetes
+          baseurl=https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64
+          enabled=1
+          gpgcheck=1
+          repo_gpgcheck=1
+          gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+
+    - name: Install kubelet, kubeadm, kubectl
+      yum:
+        name:
+          - kubelet
+          - kubeadm
+          - kubectl
+        state: present
+        disable_gpg_check: yes
+
+    - name: Enable kubelet
+      systemd: name=kubelet enabled=yes
+
+- hosts: masters
+  become: yes
+  tasks:
+    - name: Init K8s Master
+      shell: kubeadm init --pod-network-cidr=192.168.0.0/16
+      register: k8s_init
+
+    - name: Set up kube config
+      shell: |
+        mkdir -p $HOME/.kube
+        cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+        chown $(id -u):$(id -g) $HOME/.kube/config
+
+    - name: Extract join command
+      shell: |
+        echo '{{ k8s_init.stdout_lines | select("search", "kubeadm join") | list | join("\\n") }}' > /tmp/join.sh
+
+- hosts: workers
+  become: yes
+  tasks:
+    - name: Join node
+      shell: bash /tmp/join.sh

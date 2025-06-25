@@ -1,0 +1,18 @@
+alertmanager:
+  enabled: true
+
+server:
+  global:
+    scrape_interval: 15s
+
+  extraScrapeConfigs:
+    - job_name: 'kubernetes-services'
+      kubernetes_sd_configs:
+        - role: service
+      relabel_configs:
+        - source_labels: [__meta_kubernetes_service_label_app]
+          action: keep
+          regex: .*
+
+  service:
+    type: ClusterIP

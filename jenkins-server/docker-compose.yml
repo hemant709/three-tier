@@ -1,0 +1,32 @@
+version: '3.8'
+services:
+  jenkins:
+    build: .
+    container_name: jenkins
+    user: root
+    ports:
+      - "8080:8080"
+      - "50000:50000"
+    volumes:
+      - jenkins_home:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /usr/local/bin/terraform:/usr/local/bin/terraform
+      - /usr/local/bin/kubectl:/usr/local/bin/kubectl
+      - ~/.kube:/root/.kube
+    environment:
+      - JAVA_OPTS=-Djenkins.install.runSetupWizard=false
+
+  nginx:
+    image: nginx:latest
+    container_name: jenkins-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx-proxy.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - jenkins
+
+volumes:
+  jenkins_home:
+

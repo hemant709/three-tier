@@ -1,0 +1,10 @@
+plugins:
+  - artifactId: git
+  - artifactId: workflow-aggregator
+  - artifactId: docker-plugin
+  - artifactId: ansible
+  - artifactId: aws-credentials
+  - artifactId: configuration-as-code
+  - artifactId: credentials-binding
+  - artifactId: terraform
+  - artifactId: kubernetes-cli

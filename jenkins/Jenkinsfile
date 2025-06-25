@@ -1,0 +1,41 @@
+pipeline {
+  agent any
+  environment {
+    ECR_REPO = 'your_aws_account_id.dkr.ecr.us-east-1.amazonaws.com/devops-project'
+  }
+  stages {
+    stage('Checkout Code') {
+      steps {
+        git 'https://github.com/your-org/devops-microservices-project.git'
+      }
+    }
+
+    stage('Build Backend') {
+      steps {
+        dir('services/backend') {
+          sh 'mvn clean install -DskipTests'
+        }
+      }
+    }
+
+    stage('Docker Build & Push') {
+      steps {
+        script {
+          def imageTag = "${ECR_REPO}:${BUILD_NUMBER}"
+          sh '''
+            aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin $ECR_REPO
+            docker build -t $ECR_REPO:$BUILD_NUMBER services/backend
+            docker push $ECR_REPO:$BUILD_NUMBER
+          '''
+          sh "sed -i 's|IMAGE_PLACEHOLDER|${imageTag}|g' services/backend/k8s_deployment.yaml"
+        }
+      }
+    }
+
+    stage('Deploy to Kubernetes') {
+      steps {
+        sh 'kubectl apply -f services/backend/k8s_deployment.yaml'
+      }
+    }
+  }
+}
