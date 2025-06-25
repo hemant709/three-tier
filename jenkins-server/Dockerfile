@@ -6,7 +6,7 @@ RUN apt-get update && \
     curl -Lo /usr/local/bin/terraform.zip https://releases.hashicorp.com/terraform/1.5.7/terraform_1.5.7_linux_amd64.zip && \
     unzip /usr/local/bin/terraform.zip -d /usr/local/bin && \
     rm /usr/local/bin/terraform.zip && \
-    curl -Lo /usr/local/bin/kubectl $(curl -s https://dl.k8s.io/release/stable.txt | sed 's|^|https://dl.k8s.io/release/|;s|$|/bin/linux/amd64/kubectl|') && \
+    curl -Lo /usr/local/bin/kubectl https://dl.k8s.io/release/v1.30.0/bin/linux/amd64/kubectl && \
     chmod +x /usr/local/bin/kubectl && \
     rm -rf /var/lib/apt/lists/*
 
